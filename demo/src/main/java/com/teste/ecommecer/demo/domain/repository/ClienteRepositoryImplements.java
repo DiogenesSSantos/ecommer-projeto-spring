@@ -41,4 +41,11 @@ public class ClienteRepositoryImplements {
         return manager.save(cliente);
 
     }
+
+    public Cliente atualizar(Cliente clienteLocalizado) {
+        return manager.save(clienteLocalizado);
+    }
+
+
+
 }

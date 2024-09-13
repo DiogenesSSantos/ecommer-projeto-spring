@@ -91,5 +91,18 @@ public class ClienteRepositoryTest {
                 ,() -> clienteService.cadastrar(cliente));
     }
 
+
+    @Test
+    public void happy_path_atualizar() {
+        var cliente = new Cliente();
+        cliente.setNome("Diogenes da silva Santos");
+
+        clienteService.atualizar(1, cliente);
+
+
+
+    }
+
+
 }
 
