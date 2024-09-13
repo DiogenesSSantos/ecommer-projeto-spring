@@ -31,6 +31,8 @@ public class ClienteRepositoryTest {
     public void happy_Path_BuscarTodos() {
         List<Cliente> clientesLocalizados = clienteRepository.findAll();
         assertNotNull(clientesLocalizados);
+
+        clientesLocalizados.forEach(System.out::println);
     }
 
 
@@ -74,13 +76,20 @@ public class ClienteRepositoryTest {
 
     @Test
     @ExceptionHandler (DadosObrigatorioNaoPreenchidoException.class)
-    public void cadatrar_vazio_DadosObrigatorioNâoPreenchidoException() throws DadosObrigatorioNaoPreenchidoException, NoSuchFieldException {
+    public void cadastrar_vazio_DadosObrigatorioNâoPreenchidoException() throws DadosObrigatorioNaoPreenchidoException, NoSuchFieldException {
         var cliente = new Cliente();
         cliente.setNome("");
-        clienteService.cadastrar(cliente);
+        assertThrows(DadosObrigatorioNaoPreenchidoException.class
+                ,() -> clienteService.cadastrar(cliente));
     }
 
-
+    @Test
+    @ExceptionHandler (NullPointerException.class)
+    public void cadastrar_Null_DadosObrigatorioNâoPreenchidoException() throws DadosObrigatorioNaoPreenchidoException, NoSuchFieldException {
+        Cliente cliente = null;
+        assertThrows(NullPointerException.class
+                ,() -> clienteService.cadastrar(cliente));
+    }
 
 }
 

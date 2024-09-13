@@ -40,14 +40,21 @@ public class ClienteService {
 
     /**
      * @param cliente recebe uma entidade de cadastro de cliente
-     * @throws BadRequestException caso a entidade passada vem Null ou com os Parametros "" e lançada a exception.
+     * @throws DadosObrigatorioNaoPreenchidoException caso a entidade passada vem Null ou com os Parametros "" e lançada a exception.
      **/
     public Cliente cadastrar(Cliente cliente) throws DadosObrigatorioNaoPreenchidoException, NoSuchFieldException {
-        if (!(cliente == null || validaCliente(cliente))) {
-            throw new DadosObrigatorioNaoPreenchidoException(
-                    "ERRO NOS DADOS  PASSADO// (nome): DADOS PASSADO-> " + cliente.getNome());
+       if (cliente == null){
+           throw new NullPointerException("NULL PASSADO NA ENTIDADE");
+       }
 
+        if (!(validaCliente(cliente))) {
+            throw new DadosObrigatorioNaoPreenchidoException(String.format(
+                    "ERRO NOS DADOS  PASSADO// (%s): DADOS PASSADO-> {'%s'} " ,
+                    cliente.getClass().getDeclaredField("nome").getName() , cliente.getNome() ));
         }
+
+
+
         return clienteRepositoryImplements.cadastrar(cliente);
     }
 
