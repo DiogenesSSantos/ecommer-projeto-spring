@@ -22,8 +22,6 @@ public class ClienteRepositoryImplements {
     @Transactional
     public Cliente add(Cliente cliente) {
         return manager.save(cliente);
-
-
     }
 
     @Transactional

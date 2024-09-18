@@ -3,23 +3,28 @@ package com.teste.ecommecer.demo.infraestrutura.service;
 
 import com.teste.ecommecer.demo.domain.model.Cliente;
 import com.teste.ecommecer.demo.domain.repository.ClienteRepositoryImplements;
-import com.teste.ecommecer.demo.infraestrutura.exception.DadosObrigatorioNaoPreenchidoException;
+import com.teste.ecommecer.demo.infraestrutura.exception.DadosObrigatorioOuNaoPreenchidoCorretamanteException;
 import com.teste.ecommecer.demo.infraestrutura.exception.EntidadeNãoLocalizadaException;
 import com.teste.ecommecer.demo.infraestrutura.exception.EntidadeRequeridaNullExcepiton;
-import org.apache.coyote.BadRequestException;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 
-import java.util.Optional;
+import static com.teste.ecommecer.demo.infraestrutura.utils.ClienteUtils.validaCliente;
+import static com.teste.ecommecer.demo.infraestrutura.utils.ClienteUtils.validaClienteComecaComEspaco;
 
 
 @Service
 public class ClienteService {
 
-    @Autowired
     private ClienteRepositoryImplements clienteRepositoryImplements;
+
+
+    @Autowired
+    public ClienteService(ClienteRepositoryImplements clienteRepositoryImplements) {
+        this.clienteRepositoryImplements = clienteRepositoryImplements;
+
+    }
 
 
     /**
@@ -43,17 +48,22 @@ public class ClienteService {
 
     /**
      * @param cliente recebe uma entidade de cadastro de cliente
-     * @throws DadosObrigatorioNaoPreenchidoException caso a entidade passada vem Null ou com os Parametros "" e lançada a exception.
+     * @throws DadosObrigatorioOuNaoPreenchidoCorretamanteException caso a entidade passada vem Null ou com os Parametros "" e lançada a exception.
      **/
-    public Cliente cadastrar(Cliente cliente) throws DadosObrigatorioNaoPreenchidoException, NoSuchFieldException {
+    public Cliente cadastrar(Cliente cliente) throws DadosObrigatorioOuNaoPreenchidoCorretamanteException, NoSuchFieldException {
         if (cliente == null) {
             throw new NullPointerException("NULL PASSADO NA ENTIDADE");
         }
 
-        if (!(validaCliente(cliente))) {
-            throw new DadosObrigatorioNaoPreenchidoException(String.format(
+        if (!validaCliente(cliente)) {
+            throw new DadosObrigatorioOuNaoPreenchidoCorretamanteException(String.format(
                     "ERRO NOS DADOS  PASSADO// (%s): DADOS PASSADO-> {'%s'} ",
                     cliente.getClass().getDeclaredField("nome").getName(), cliente.getNome()));
+        }
+
+        if(validaClienteComecaComEspaco(cliente)){
+            throw new DadosObrigatorioOuNaoPreenchidoCorretamanteException(
+                    "O CAMPO NÃO PODE COMEÇAR COM ESPAÇO");
         }
 
 
@@ -61,21 +71,28 @@ public class ClienteService {
     }
 
 
-    public Optional<Cliente> atualizar(Long id, Cliente cliente) throws EntidadeNãoLocalizadaException {
+    public Cliente atualizar(Long id, Cliente cliente) throws EntidadeNãoLocalizadaException, NoSuchFieldException, DadosObrigatorioOuNaoPreenchidoCorretamanteException {
         var clienteLocalizado = buscarID(id);
 
         if (cliente == null) {
             throw new NullPointerException("ENTIDADE PASSADA ESTÁ VAZIA");
         }
-        BeanUtils.copyProperties(clienteLocalizado, cliente, "id");
+        if (!validaCliente(cliente)) {
+            throw new DadosObrigatorioOuNaoPreenchidoCorretamanteException(
+                    String.format("DADOS OBRIGATORIO NÃO PREENCHIDO CORRETAMENTE CAMPO -> (%s)",
+                            cliente.getClass().getDeclaredField("nome")));
+        }
 
-        clienteLocalizado = clienteRepositoryImplements.atualizar(clienteLocalizado);
+        if(validaClienteComecaComEspaco(cliente)){
+            throw new DadosObrigatorioOuNaoPreenchidoCorretamanteException(
+                    "O CAMPO NÃO PODE COMEÇAR COM ESPAÇO");
+        }
 
-        return Optional.ofNullable(clienteLocalizado);
+        BeanUtils.copyProperties(clienteLocalizado ,cliente , "nome");
+        cliente = clienteRepositoryImplements.atualizar(cliente);
+
+        return cliente;
     }
 
 
-    private static boolean validaCliente(Cliente cliente) {
-        return StringUtils.hasLength(cliente.getNome());
-    }
 }

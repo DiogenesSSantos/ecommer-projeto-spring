@@ -16,7 +16,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Getter
 @Table(name = "tb_cliente")
-
 public class Cliente {
 
     @EqualsAndHashCode.Include
